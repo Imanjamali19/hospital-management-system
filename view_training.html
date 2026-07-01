@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تابلوی آموزش و کنفرانس</title>
+    <link rel="icon" type="image/png" href="./media/LOG2O Qr.png">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        :root { --accent: #2ecc71; }
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; background: #040914; font-family: Tahoma, sans-serif; overflow: hidden; display: flex; flex-direction: column; }
+        .header { font-size: 1.6rem; font-weight: bold; padding: 12px 0; margin: 0; color: var(--accent); text-align: center; background: rgba(0,0,0,0.9); border-bottom: 3px solid var(--accent); flex-shrink: 0; z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        #display-area { flex-grow: 1; width: 100%; position: relative; background: #ffffff; display: block; overflow-y: auto; overflow-x: hidden; padding: 15px 20px; box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 14px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 8px; border: 3px solid #e2e8f0; }
+        ::-webkit-scrollbar-thumb:hover { background: #27ae60; }
+        #table-wrapper { transform-origin: top right; width: max-content; }
+        table { border-collapse: collapse; background: #ffffff !important; width: max-content; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        td, th { padding: 8px 10px !important; border: 1px solid #cbd5e1 !important; text-align: center !important; font-size: 1.3rem !important; font-weight: 700 !important; color: #0f172a !important; white-space: nowrap; }
+        th, tr:first-child td { background: var(--accent) !important; color: white !important; font-size: 1.4rem !important; }
+        tr:nth-child(even) { background: #f8fafc !important; }
+        .loading { font-size: 1.5rem; color: #333; font-weight: bold; text-align: center; margin-top: 50px; }
+        img.doc-image { max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin: 0 auto; display: block; }
+    </style>
+</head>
+<body>
+    <div class="header">📚 برنامه‌های آموزشی، کنفرانس‌ها و پروتکل‌ها</div>
+    <div id="display-area"><div class="loading">⏳ در حال بارگذاری...</div></div>
+
+    <script>
+        function fitWidthOnly() {
+            const area = document.getElementById('display-area');
+            const wrapper = document.getElementById('table-wrapper');
+            if (!wrapper || !area) return;
+            wrapper.style.transform = 'scale(1)';
+            wrapper.style.marginBottom = '0px';
+            const areaWidth = area.clientWidth - 40; 
+            const tableWidth = wrapper.scrollWidth;
+            const tableHeight = wrapper.scrollHeight;
+            if (tableWidth === 0) return;
+            const scale = areaWidth / tableWidth;
+            if (scale < 1) {
+                wrapper.style.transform = `scale(${scale})`;
+                const lostHeight = tableHeight - (tableHeight * scale);
+                wrapper.style.marginBottom = `-${lostHeight}px`;
+            }
+        }
+        window.addEventListener('resize', fitWidthOnly);
+        async function loadDoc() {
+            const display = document.getElementById('display-area');
+            try {
+                const type = 'training'; 
+                const res = await fetch(`api.php?action=get_file_info&type=${type}`);
+                const data = await res.json();
+                if (data.status === 'success') {
+                    if (['jpg', 'jpeg', 'png'].includes(data.ext)) {
+                        display.innerHTML = `<img class="doc-image" src="${data.url}&t=${new Date().getTime()}">`;
+                    } else if (['xlsx', 'xls', 'csv'].includes(data.ext)) {
+                        const response = await fetch(data.url);
+                        if (!response.ok) throw new Error("مسدود شده توسط شبکه");
+                        const workbook = XLSX.read(await response.arrayBuffer(), {type: 'array'});
+                        display.innerHTML = `<div id="table-wrapper">${XLSX.utils.sheet_to_html(workbook.Sheets[workbook.SheetNames[0]])}</div>`;
+                        setTimeout(fitWidthOnly, 50);
+                    }
+                } else { display.innerHTML = '<div style="color:#64748b; font-size:1.5rem; text-align:center; padding: 50px;">فایلی آپلود نشده است.</div>'; }
+            } catch(e) { display.innerHTML = `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 50px;">خطا در شبکه:<br>${e.message}</div>`; }
+        }
+        loadDoc(); setInterval(loadDoc, 60000);
+    </script>
+</body>
+</html>

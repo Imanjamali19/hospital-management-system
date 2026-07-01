@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مدیریت گزارشات استریلیزاسیون (CSR)</title>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #f1f5f9; margin: 0; padding: 20px; color: #333; display: flex; gap: 20px; height: 100vh; box-sizing: border-box; }
+        .form-section { flex: 1; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-top: 5px solid #0284c7; }
+        .form-header { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
+        .date-badge { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 8px 20px; border-radius: 20px; font-weight: bold; margin-bottom: 20px; font-size: 1.2rem;}
+        .shift-group { margin-bottom: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+        .shift-header-wrapper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .shift-group label { font-weight: bold; color: #334155; margin: 0; }
+        .author-badge { font-size: 0.8rem; color: #64748b; font-weight: normal; background: #f1f5f9; padding: 3px 10px; border-radius: 10px; }
+        textarea { width: 100%; flex-grow: 1; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; resize: none; background: #f8fafc; outline: none; transition: 0.3s; }
+        textarea:focus { border-color: #0284c7; background: #fff; }
+        .btn-save { background: #0284c7; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-save:hover { background: #0369a1; }
+        .calendar-section { flex: 1; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid #0284c7; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .cal-btn { background: #f1f5f9; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #334155; }
+        .month-year { font-size: 1.5rem; font-weight: bold; color: #0f172a; }
+        .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: bold; color: #64748b; margin-bottom: 10px; }
+        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .day-cell { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; border-radius: 10px; border: 2px solid #f1f5f9; cursor: pointer; font-size: 1.2rem; font-weight: bold; color: #334155; position: relative; }
+        .day-cell:hover { border-color: #0284c7; color: #0284c7; }
+        .day-cell.active { background: #0284c7; color: #fff; border-color: #0284c7; }
+        .day-cell.has-data::after { content: ''; position: absolute; bottom: 5px; width: 6px; height: 6px; background: #f59e0b; border-radius: 50%; }
+        .day-cell.empty { visibility: hidden; }
+        .back-link { position: absolute; top: 20px; left: 20px; color: #64748b; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <a href="dashboard.html" class="back-link">🔙 بازگشت</a>
+    <div class="form-section">
+        <h2 class="form-header">📦 ثبت عملکرد واحد CSR</h2>
+        <div class="date-badge" id="selectedDateDisplay">انتخاب روز از تقویم...</div>
+        <div class="shift-group">
+            <div class="shift-header-wrapper"><label>☀️ گزارش شیفت صبح</label><div class="author-badge" id="reg_morning"></div></div>
+            <textarea id="morning_report" placeholder="آمار پک‌ها، وضعیت اتوکلاوها..."></textarea>
+        </div>
+        <div class="shift-group">
+            <div class="shift-header-wrapper"><label>🌤️ گزارش شیفت عصر</label><div class="author-badge" id="reg_afternoon"></div></div>
+            <textarea id="afternoon_report"></textarea>
+        </div>
+        <div class="shift-group">
+            <div class="shift-header-wrapper"><label>🌙 گزارش شیفت شب</label><div class="author-badge" id="reg_night"></div></div>
+            <textarea id="night_report"></textarea>
+        </div>
+        <button class="btn-save" onclick="saveReport()">💾 ذخیره عملکرد CSR</button>
+    </div>
+
+    <div class="calendar-section">
+        <div class="cal-header">
+            <button class="cal-btn" onclick="changeMonth(1)">بعدی</button>
+            <div class="month-year" id="monthYearDisplay">بارگذاری...</div>
+            <button class="cal-btn" onclick="changeMonth(-1)">قبلی</button>
+        </div>
+        <div class="weekdays"><div>ش</div><div>ی</div><div>د</div><div>س</div><div>چ</div><div>پ</div><div>ج</div></div>
+        <div class="days-grid" id="daysGrid"></div>
+    </div>
+
+    <script>
+        // لایه امنیتی هوشمند شده برای اجازه به پرسنل عادی (user)
+        async function authCheck() {
+            const res = await fetch(`api.php?action=get_current_user&_t=${new Date().getTime()}`);
+            const user = await res.json();
+            
+            const isCSR = (user.department || '').includes('CSR');
+            const isNormalOrAdmin = (user.role === 'user' || user.username === 'iman');
+
+            // فقط در صورتی اخراج می‌شود که نه CSR باشد، و نه دسترسی User/Admin داشته باشد (یعنی Limited باشد)
+            if (!isCSR && !isNormalOrAdmin) {
+                alert('شما مجوز دسترسی به سامانه ثبت CSR را ندارید.');
+                window.location.href = 'dashboard.html';
+            }
+        }
+        authCheck();
+
+        let currentPDate = new persianDate(); let selectedDate = currentPDate.format('YYYY/MM/DD'); let activeDates = [];
+        async function fetchActiveDates() {
+            try {
+                const res = await fetch('api.php?action=get_csr_report_data');
+                const json = await res.json();
+                if(json.status === 'success') activeDates = json.active_dates || [];
+                renderCalendar();
+            } catch(e) {}
+        }
+
+        function renderCalendar() {
+            const daysGrid = document.getElementById('daysGrid'); daysGrid.innerHTML = '';
+            const year = currentPDate.year(); const month = currentPDate.month();
+            document.getElementById('monthYearDisplay').innerText = `${currentPDate.format('MMMM')} ${year}`;
+            const firstDayOfMonth = new persianDate([year, month, 1]); let startDayOfWeek = firstDayOfMonth.day();
+            const daysInMonth = currentPDate.daysInMonth();
+
+            for(let i = 1; i < startDayOfWeek; i++) { daysGrid.innerHTML += `<div class="day-cell empty"></div>`; }
+            for(let d = 1; d <= daysInMonth; d++) {
+                const mStr = month < 10 ? '0'+month : month; const dStr = d < 10 ? '0'+d : d;
+                const fullDateStr = `${year}/${mStr}/${dStr}`;
+                const isActive = fullDateStr === selectedDate ? 'active' : '';
+                const hasData = activeDates.includes(fullDateStr) ? 'has-data' : '';
+                daysGrid.innerHTML += `<div class="day-cell ${isActive} ${hasData}" onclick="selectDate('${fullDateStr}')">${d}</div>`;
+            }
+        }
+
+        function changeMonth(offset) { currentPDate = currentPDate.add('months', offset); renderCalendar(); }
+
+        async function selectDate(dateStr) {
+            selectedDate = dateStr; document.getElementById('selectedDateDisplay').innerText = `تاریخ: ${dateStr}`;
+            renderCalendar(); 
+            try {
+                const res = await fetch(`api.php?action=get_csr_report_data&date=${dateStr}`);
+                const json = await res.json();
+                if (json.status === 'success' && json.data) {
+                    document.getElementById('morning_report').value = json.data.morning_report || '';
+                    document.getElementById('afternoon_report').value = json.data.afternoon_report || '';
+                    document.getElementById('night_report').value = json.data.night_report || '';
+                    document.getElementById('reg_morning').innerText = json.data.morning_reg ? `ثبت: ${json.data.morning_reg}` : '';
+                    document.getElementById('reg_afternoon').innerText = json.data.afternoon_reg ? `ثبت: ${json.data.afternoon_reg}` : '';
+                    document.getElementById('reg_night').innerText = json.data.night_reg ? `ثبت: ${json.data.night_reg}` : '';
+                } else {
+                    document.getElementById('morning_report').value = ''; document.getElementById('afternoon_report').value = ''; document.getElementById('night_report').value = '';
+                    document.getElementById('reg_morning').innerText = ''; document.getElementById('reg_afternoon').innerText = ''; document.getElementById('reg_night').innerText = '';
+                }
+            } catch (e) {}
+        }
+
+        async function saveReport() {
+            const formData = new FormData();
+            formData.append('report_date', selectedDate);
+            formData.append('morning_report', document.getElementById('morning_report').value);
+            formData.append('afternoon_report', document.getElementById('afternoon_report').value);
+            formData.append('night_report', document.getElementById('night_report').value);
+
+            const btn = document.querySelector('.btn-save'); btn.innerText = "در حال ذخیره...";
+            try {
+                const res = await fetch('api.php?action=save_csr_report', { method: 'POST', body: formData });
+                if((await res.json()).status === 'success') {
+                    if(!activeDates.includes(selectedDate)) activeDates.push(selectedDate);
+                    alert('گزارش CSR ثبت شد!'); selectDate(selectedDate);
+                }
+            } catch (e) { alert('خطا'); } finally { btn.innerText = "💾 ذخیره عملکرد CSR"; }
+        }
+        fetchActiveDates(); selectDate(selectedDate);
+    </script>
+</body>
+</html>

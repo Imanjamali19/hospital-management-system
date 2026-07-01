@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>آپلود مستندات و برنامه‌های ماهیانه اتاق عمل</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            background-color: #f4f7f6;
+            padding: 30px;
+            color: #333;
+        }
+
+        .upload-container {
+            max-width: 650px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .header-title {
+            color: #0277bd;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: right;
+        }
+
+        label {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        select,
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: Tahoma;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        select:focus {
+            border-color: #0277bd;
+        }
+
+        .btn-upload {
+            background-color: #0277bd;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-upload:hover {
+            background-color: #01579b;
+            transform: scale(1.01);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #555;
+            text-decoration: none;
+            font-weight: bold;
+            position: absolute;
+            top: 30px;
+            right: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="dashboard.html" class="back-link">🔙 بازگشت به داشبورد</a>
+
+    <div class="upload-container">
+        <h2 class="header-title">📅 مدیریت و آپلود تصاویر برنامه‌های ماهیانه</h2>
+        <p style="color: #7f8c8d; margin-bottom: 30px;">نوع برنامه را انتخاب کرده و فایل تصویر زنده آن را بارگذاری کنید.
+        </p>
+
+        <form id="uploadForm">
+            <div class="form-group">
+                <label>انتخاب عنوان مستند / برنامه:</label>
+                <select id="code_type" name="code_type">
+                    <option value="staff">برنامه ماهیانه پرسنل</option>
+                    <option value="surgeons">برنامه آنکالی جراحان</option>
+                    <option value="99">برنامه کد ۹۹ (CPR)</option>
+                    <option value="98">برنامه کد ۹۸ (اورژانس تنفسی)</option>
+                    <option value="training">آموزش</option>
+                    <option value="management">برنامه راند مدیریتی</option>
+                    <option value="washing">واشینگ اتاق عمل</option>
+                    <option value="csr">برنامه بخش CSR</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>انتخاب تصویر (فرمت‌های عکس):</label>
+                <input type="file" id="code_image" name="code_image" accept="image/png, image/jpeg, image/jpg">
+            </div>
+
+            <button type="button" class="btn-upload" onclick="uploadImage()">📤 آپلود و جایگزینی روی مانیتورها</button>
+        </form>
+    </div>
+
+    <script>
+        async function uploadImage() {
+            const fileInput = document.getElementById('code_image');
+            if (fileInput.files.length === 0) {
+                alert("لطفاً ابتدا فایل تصویر برنامه را انتخاب کنید!");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('code_type', document.getElementById('code_type').value);
+            formData.append('code_image', fileInput.files[0]);
+
+            const btn = document.querySelector('.btn-upload');
+            btn.innerText = "در حال بارگذاری روی سرور...";
+
+            try {
+                const response = await fetch('api.php?action=upload_code_image', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    alert('تصویر برنامه با موفقیت آپلود و جایگزین شد!');
+                    document.getElementById('uploadForm').reset();
+                } else {
+                    alert('خطا: ' + result.message);
+                }
+            } catch (error) {
+                alert('خطا در ارتباط با سرور.');
+            } finally {
+                btn.innerText = "📤 آپلود و جایگزینی روی مانیتورها";
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,3 @@
+database.sqlite
+uploads/
+.DS_Store

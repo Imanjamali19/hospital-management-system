@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>نمایش برنامه کد اورژانس</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Tahoma, sans-serif;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #e74c3c;
+            width: 100%;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 80px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .clock {
+            font-size: 1.8rem;
+            font-weight: bold;
+            direction: ltr;
+        }
+
+        .image-container {
+            margin-top: 80px;
+            width: 100%;
+            height: calc(100vh - 80px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            object-fit: contain;
+        }
+
+        .loading-text {
+            color: #fff;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1 id="pageTitle">🚨 برنامه کد اورژانس</h1>
+        <div class="clock" id="liveClock">00:00:00</div>
+    </div>
+
+    <div class="image-container">
+        <img id="codeImg" style="display: none;" alt="تصویر یافت نشد">
+        <div id="noImgText" class="loading-text">در حال بارگذاری تصویر... (در صورتی که عکسی نمی‌بینید، از پنل ادمین آن
+            را آپلود کنید)</div>
+    </div>
+
+    <script>
+        // آپدیت ساعت
+        setInterval(() => {
+            document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('fa-IR');
+        }, 1000);
+
+        // تشخیص اینکه کد ۹۸ خواسته شده یا ۹۹
+        const urlParams = new URLSearchParams(window.location.search);
+        const codeType = urlParams.get('type') || '99';
+
+        document.getElementById('pageTitle').innerText = `🚨 برنامه تیم شیفت کد ${codeType}`;
+
+        function loadImage() {
+            const imgElement = document.getElementById('codeImg');
+            const noImgText = document.getElementById('noImgText');
+
+            // اضافه کردن تاریخ به انتهای آدرس برای جلوگیری از کش شدن عکس (Anti-cache)
+            const newSrc = `api.php?action=get_code_image&type=${codeType}&_t=${new Date().getTime()}`;
+
+            // ایجاد یک تصویر موقت برای تست لود شدن
+            const tempImg = new Image();
+            tempImg.onload = function () {
+                imgElement.src = newSrc;
+                imgElement.style.display = 'block';
+                noImgText.style.display = 'none';
+            };
+            tempImg.onerror = function () {
+                imgElement.style.display = 'none';
+                noImgText.style.display = 'block';
+                noImgText.innerText = `هیچ عکسی برای کد ${codeType} آپلود نشده است.`;
+            };
+            tempImg.src = newSrc;
+        }
+
+        // لود اولیه
+        loadImage();
+
+        // هر 30 ثانیه صفحه عکس را رفرش می‌کند تا اگر عکس جدید آپلود شد، خودکار نمایش داده شود
+        setInterval(loadImage, 30000);
+    </script>
+</body>
+
+</html>

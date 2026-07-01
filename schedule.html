@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>برنامه روزانه شیفت‌ها - بیمارستان تخصصی آیت الله یثربی</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa 0%, #e8eaf6 100%);
+            padding: 30px;
+            color: #2c3e50;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .schedule-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-section h2 {
+            color: #0277bd;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header-section p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .top-controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+
+        .date-input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .date-input-group input {
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            border: 2px solid #0277bd;
+            border-radius: 10px;
+            font-family: Tahoma;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+            width: 250px;
+        }
+
+        .date-input-group input:focus {
+            box-shadow: 0 0 10px rgba(2, 119, 189, 0.3);
+        }
+
+        /* طراحی ۳ ستونه برای شیفت‌ها */
+        .shifts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .shift-card {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
+            border-top: 6px solid #ccc;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .shift-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .shift-card.morning {
+            border-top-color: #f1c40f;
+        }
+
+        .shift-card.afternoon {
+            border-top-color: #e67e22;
+        }
+
+        .shift-card.night {
+            border-top-color: #34495e;
+        }
+
+        .shift-card h3 {
+            margin-top: 0;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .shift-card.morning h3 {
+            color: #d35400;
+        }
+
+        .shift-card.afternoon h3 {
+            color: #d35400;
+        }
+
+        .shift-card.night h3 {
+            color: #2c3e50;
+        }
+
+        textarea {
+            width: 100%;
+            flex-grow: 1;
+            min-height: 250px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: Tahoma;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            resize: vertical;
+            background-color: #fcfcfc;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #0277bd;
+            background-color: #fff;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-save {
+            background: #0277bd;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(2, 119, 189, 0.4);
+        }
+
+        .btn-save:hover {
+            background: #01579b;
+            transform: scale(1.05);
+        }
+
+        .btn-clear {
+            background: #e74c3c;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-clear:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .back-link {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            color: #0277bd;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="dashboard.html" class="back-link">🔙 بازگشت به داشبورد</a>
+
+    <div class="schedule-container">
+        <div class="header-section">
+            <h2>📅 پنل مدیریت برنامه و شیفت‌های بیمارستان</h2>
+            <p>برنامه پرسنل، آنکال‌ها و توضیحات شیفت را در این بخش ثبت کنید</p>
+        </div>
+
+        <div class="top-controls">
+            <div class="date-input-group">
+                <label>تاریخ برنامه (شمسی):</label>
+                <input type="text" id="schedule_date" placeholder="مثال: ۱۴۰۵/۰۳/۲۱">
+            </div>
+        </div>
+
+        <div class="shifts-grid">
+            <div class="shift-card morning">
+                <h3>☀️ شیفت صبح</h3>
+                <textarea id="morning_shift"
+                    placeholder="توضیحات، اسامی پرسنل و آنکال‌های شیفت صبح را اینجا وارد کنید..."></textarea>
+            </div>
+
+            <div class="shift-card afternoon">
+                <h3>🌤️ شیفت عصر (ظهر)</h3>
+                <textarea id="afternoon_shift"
+                    placeholder="توضیحات، اسامی پرسنل و آنکال‌های شیفت عصر را اینجا وارد کنید..."></textarea>
+            </div>
+
+            <div class="shift-card night">
+                <h3>🌙 شیفت شب</h3>
+                <textarea id="night_shift"
+                    placeholder="توضیحات، اسامی پرسنل و آنکال‌های شیفت شب را اینجا وارد کنید..."></textarea>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-save" onclick="saveSchedule()">💾 ذخیره برنامه در سیستم</button>
+            <button class="btn btn-clear" onclick="clearSchedule()">🧹 پاکسازی و بایگانی</button>
+        </div>
+    </div>
+
+    <script>
+        // به محض لود شدن صفحه، تاریخ امروز را به صورت خودکار پیشنهاد بده
+        document.getElementById('schedule_date').value = new Intl.DateTimeFormat('fa-IR').format(new Date());
+
+        async function saveSchedule() {
+            const formData = new FormData();
+            formData.append('schedule_date', document.getElementById('schedule_date').value);
+            formData.append('morning_shift', document.getElementById('morning_shift').value);
+            formData.append('afternoon_shift', document.getElementById('afternoon_shift').value);
+            formData.append('night_shift', document.getElementById('night_shift').value);
+
+            try {
+                const response = await fetch('api.php?action=save_schedule', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    alert('برنامه شیفت‌ها با موفقیت در دیتابیس ثبت شد!');
+                } else {
+                    alert('خطا در ثبت: ' + result.message);
+                }
+            } catch (error) {
+                alert('ارتباط با سرور قطع شده است.');
+            }
+        }
+
+        async function clearSchedule() {
+            if (confirm('آیا مطمئن هستید؟ این کار فرم را پاک می‌کند اما اطلاعات برای گزارش‌گیری در دیتابیس بایگانی می‌شوند.')) {
+                try {
+                    const response = await fetch('api.php?action=clear_schedule', { method: 'POST' });
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        // خالی کردن فرم‌ها
+                        document.getElementById('morning_shift').value = '';
+                        document.getElementById('afternoon_shift').value = '';
+                        document.getElementById('night_shift').value = '';
+                        alert('صفحه پاکسازی شد و برنامه قبلی با موفقیت بایگانی گردید.');
+                    } else {
+                        alert('خطا در پاکسازی: ' + result.message);
+                    }
+                } catch (error) {
+                    alert('ارتباط با سرور قطع شده است.');
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

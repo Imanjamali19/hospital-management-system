@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مدیریت و ثبت کاربران - بیمارستان یثربی</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #f5f7fa; margin: 0; padding: 40px 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333; box-sizing: border-box;}
+        .form-container { background: #ffffff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 500px; border-top: 5px solid #e67e22; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h2 { margin: 0; color: #2c3e50; font-size: 1.6rem; }
+        .header p { color: #7f8c8d; font-size: 0.95rem; margin-top: 5px; }
+
+        .input-group { margin-bottom: 15px; text-align: right; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 6px; color: #34495e; font-size: 0.95rem; }
+        .input-group input, .input-group select { width: 100%; padding: 12px; border: 2px solid #e1e8ed; border-radius: 8px; font-family: Tahoma; font-size: 1rem; box-sizing: border-box; outline: none; transition: 0.3s; }
+        .input-group input:focus, .input-group select:focus { border-color: #e67e22; }
+        .ltr-input { direction: ltr; font-family: sans-serif; }
+
+        .btn-submit { width: 100%; background: #e67e22; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-submit:hover { background: #d35400; }
+        
+        /* ------------------------------------------- */
+        /* استایل اختصاصی باکس ابزارهای پیشرفته ریست سیستم */
+        /* ------------------------------------------- */
+        .advanced-tools-box {
+            margin-top: 35px; padding: 20px; border: 2px dashed #f5c6cb;
+            background-color: #f8d7da; border-radius: 10px; text-align: right;
+        }
+        .advanced-tools-box h3 { margin: 0 0 10px 0; color: #721c24; font-size: 1.1rem; }
+        .advanced-tools-box p { margin: 0 0 15px 0; color: #491217; font-size: 0.85rem; line-height: 1.5; }
+        .btn-danger-reset {
+            width: 100%; background: #dc3545; color: white; border: none; padding: 12px;
+            border-radius: 8px; font-family: Tahoma; font-size: 0.95rem; font-weight: bold;
+            cursor: pointer; transition: 0.2s; text-align: center;
+        }
+        .btn-danger-reset:hover { background: #bd2130; }
+        /* ------------------------------------------- */
+
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #7f8c8d; text-decoration: none; font-weight: bold; }
+        .message-box { margin-top: 15px; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: bold; text-align: center; display: none; }
+        .msg-success { background: #e8f8f5; color: #1abc9c; border: 1px solid #1abc9c; }
+        .msg-error { background: #fadbd8; color: #e74c3c; border: 1px solid #e74c3c; }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <div class="header">
+            <h2>👑 مدیریت پرسنل سیستم</h2>
+            <p>ایجاد حساب کاربری جهت دسترسی و ثبت اطلاعات</p>
+        </div>
+
+        <div class="input-group">
+            <label>نام و نام خانوادگی:</label>
+            <input type="text" id="full_name" placeholder="مثال: مریم احمدی">
+        </div>
+
+        <div class="input-group">
+            <label>بخش / واحد فعالیت:</label>
+            <select id="department">
+                <option value="اتاق عمل">پرسنل اتاق عمل</option>
+                <option value="بیهوشی">پرسنل بیهوشی</option>
+                <option value="استریلیزاسیون (CSR)">استریلیزاسیون (CSR)</option>
+                <option value="فناوری اطلاعات (IT)">فناوری اطلاعات (IT)</option>
+                <option value="مدیریت و سوپروایزر">مدیریت و سوپروایزر</option>
+                <option value="پذیرش">پذیرش</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>نام کاربری (حروف انگلیسی):</label>
+            <input type="text" id="username" class="ltr-input" placeholder="مثال: ahmadi" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+            <label>رمز عبور:</label>
+            <input type="password" id="password" class="ltr-input" placeholder="****">
+        </div>
+
+        <div class="input-group">
+            <label>سطح دسترسی در سیستم:</label>
+            <select id="role">
+                <option value="user">کاربر عادی (ثبت جراحی، آپلود، گزارشات و تقویم)</option>
+                <option value="limited">دسترسی محدود (فقط گزارشات و تقویم)</option>
+                <option value="admin">مدیر ارشد (دسترسی کامل)</option>
+            </select>
+        </div>
+
+        <button class="btn-submit" onclick="createUser()">ذخیره و ایجاد کاربر</button>
+        <div id="messageBox" class="message-box"></div>
+
+        <div class="advanced-tools-box">
+            <h3>⚙️ ابزارهای پیشرفته مدیریت کل</h3>
+            <p>جهت آماده‌سازی سیستم برای لانچ رسمی فردا، می‌توانید با فشردن دکمه زیر تمامی جراحی‌ها، گزارشات و عکس‌های تستی را پاک کنید. لیست پرسنل و کاربران سیستم حذف نخواهد شد.</p>
+            <button class="btn-danger-reset" onclick="triggerSystemReset()">⚠️ ریست و پاکسازی اطلاعات تستی سامانه</button>
+        </div>
+
+        <a href="dashboard.html" class="back-link">🔙 بازگشت به داشبورد</a>
+    </div>
+
+    <script>
+        async function authCheck() {
+            const res = await fetch(`api.php?action=get_current_user&_t=${new Date().getTime()}`);
+            const user = await res.json();
+            if (user.username !== 'iman') {
+                alert('شما مجوز دسترسی به این صفحه را ندارید.');
+                window.location.href = 'dashboard.html';
+            }
+        }
+        authCheck();
+
+        async function createUser() {
+            const formData = new FormData();
+            formData.append('full_name', document.getElementById('full_name').value);
+            formData.append('department', document.getElementById('department').value);
+            formData.append('username', document.getElementById('username').value);
+            formData.append('password', document.getElementById('password').value);
+            formData.append('role', document.getElementById('role').value);
+
+            const messageBox = document.getElementById('messageBox');
+            messageBox.style.display = 'none'; messageBox.className = 'message-box';
+
+            if (!formData.get('username') || !formData.get('password') || !formData.get('full_name')) {
+                messageBox.innerText = 'لطفاً تمامی فیلدها را پر کنید.';
+                messageBox.classList.add('msg-error'); messageBox.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('api.php?action=create_user', { method: 'POST', body: formData });
+                const result = await response.json();
+                messageBox.innerText = result.message;
+                messageBox.classList.add(result.status === 'success' ? 'msg-success' : 'msg-error');
+                messageBox.style.display = 'block';
+
+                if(result.status === 'success') {
+                    document.getElementById('full_name').value = '';
+                    document.getElementById('username').value = '';
+                    document.getElementById('password').value = '';
+                }
+            } catch (error) {
+                messageBox.innerText = 'خطا در ارتباط با سرور.';
+                messageBox.classList.add('msg-error'); messageBox.style.display = 'block';
+            }
+        }
+
+        // 🚨 اسکریپت جاوااسکریپت برای فراخوانی عملیات ریست با امنیت دو مرحله‌ای
+        async function triggerSystemReset() {
+            const firstCheck = confirm("آیا از پاکسازی کل سامانه مطمئن هستید؟ تمام داده‌های جراحی، تقویم‌ها، گزارشات اتاق عمل و CSR به همراه فایل‌های آپلود شده کاملاً حذف خواهند شد!");
+            if (firstCheck) {
+                const secondCheck = confirm("تأکید نهایی: لیست پرسنل و کاربران سیستم دست‌نخورده باقی می‌ماند اما بقیه اطلاعات صفر می‌گردد. آیا عملیات لانچ اجرا شود؟");
+                if (secondCheck) {
+                    try {
+                        const response = await fetch('api.php?action=reset_system');
+                        const result = await response.json();
+                        alert(result.message);
+                        if (result.status === 'success') {
+                            window.location.reload();
+                        }
+                    } catch (e) {
+                        alert("خطا در برقراری ارتباط با سرور دیتابیس.");
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>نمایشگر مستندات</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0d1117;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Tahoma, sans-serif;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #1f2937;
+            width: 100%;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #00fff5;
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 80px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border-bottom: 2px solid #00fff5;
+            z-index: 10;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px rgba(0, 255, 245, 0.3);
+        }
+
+        .clock {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #06d6a0;
+            direction: ltr;
+        }
+
+        .image-container {
+            margin-top: 80px;
+            width: 100vw;
+            height: calc(100vh - 80px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            box-sizing: border-box;
+            background: radial-gradient(circle, #161b22 0%, #0d1117 100%);
+        }
+
+        /* هوشمندی سایز عکس در این کلاس قرار دارد */
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            object-fit: contain;
+            /* بدون دفرمه شدن در کادر فیت می‌شود */
+            background-color: #1f2937;
+        }
+
+        .loading-text {
+            color: #8b949e;
+            font-size: 1.5rem;
+            text-align: center;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1 id="pageTitle">در حال بارگذاری...</h1>
+        <div class="clock" id="liveClock">00:00:00</div>
+    </div>
+
+    <div class="image-container">
+        <img id="scheduleImg" style="display: none;" alt="تصویر برنامه">
+        <div id="noImgText" class="loading-text">در حال دریافت تصویر از سرور... (در صورت عدم نمایش، لطفاً فایل را از
+            داشبورد آپلود کنید)</div>
+    </div>
+
+    <script>
+        // آپدیت ساعت زنده
+        setInterval(() => {
+            document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('fa-IR');
+        }, 1000);
+
+        // ==========================================
+        // 🔥 برای ساخت صفحات جدید فقط این دو خط را عوض کن 🔥
+        // ==========================================
+        const pageType = 'csr';
+        const pageTitle = '📦 برنامه شیفت پرسنل استریلیزاسیون مرکزی (CSR)';
+        // ==========================================
+
+        document.getElementById('pageTitle').innerText = pageTitle;
+
+        function loadLiveImage() {
+            const imgElement = document.getElementById('scheduleImg');
+            const noImgText = document.getElementById('noImgText');
+            // اتصال به API برای گرفتن عکس (با قابلیت ضد کش برای آپدیت فوری)
+            const srcUrl = `api.php?action=get_code_image&type=${pageType}&_t=${new Date().getTime()}`;
+
+            const testImg = new Image();
+            testImg.onload = function () {
+                imgElement.src = srcUrl;
+                imgElement.style.display = 'block';
+                noImgText.style.display = 'none';
+            };
+            testImg.onerror = function () {
+                imgElement.style.display = 'none';
+                noImgText.style.display = 'block';
+            };
+            testImg.src = srcUrl;
+        }
+
+        loadLiveImage();
+        // رفرش هوشمند خودکار تصویر هر ۳۰ ثانیه
+        setInterval(loadLiveImage, 30000);
+    </script>
+</body>
+
+</html>

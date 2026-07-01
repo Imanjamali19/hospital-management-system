@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>پنل مدیریت - بیمارستان تخصصی آیت الله یثربی</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            background-color: #f4f7f6;
+            padding: 20px;
+            color: #333;
+        }
+
+        .admin-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #0277bd;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #d35400;
+        }
+
+        .header-title {
+            text-align: center;
+            color: #0277bd;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: Tahoma;
+            font-size: 1rem;
+        }
+
+        .btn-save {
+            background-color: #0277bd;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 25px;
+            transition: 0.3s;
+        }
+
+        .btn-save:hover {
+            background-color: #01579b;
+        }
+
+        .btn-clear {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+
+        .btn-clear:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-container">
+        <a href="dashboard.html" class="back-link">
+            <span>🔙</span> بازگشت به داشبورد اصلی
+        </a>
+
+        <h2 class="header-title">ثبت جراحی جدید - برد اتاق‌های عمل</h2>
+
+        <form id="surgeryForm">
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>انتخاب اتاق عمل / بخش:</label>
+                    <select id="room_id">
+                        <option value="1">اتاق عمل ۱</option>
+                        <option value="2">اتاق عمل ۲</option>
+                        <option value="3">اتاق عمل ۳</option>
+                        <option value="4">اتاق عمل ۴</option>
+                        <option value="5">اتاق عمل ۵</option>
+                        <option value="6">ریکاوری</option>
+                        <option value="7">اتاق عمل تابان</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>انتخاب شیفت کاری:</label>
+                    <select id="shift_type" style="border: 2px solid #0277bd; font-weight: bold;">
+                        <option value="صبح">☀️ شیفت صبح</option>
+                        <option value="عصر">⛅ شیفت عصر</option>
+                        <option value="شب">🌙 شیفت شب</option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label>ساعت عمل:</label>
+                    <input type="time" id="surgery_time">
+                </div>
+                <div class="form-group">
+                    <label>تاریخ عمل (شمسی):</label>
+                    <input type="text" id="surgery_date" placeholder="مثال: ۱۴۰۵/۰۳/۲۱">
+                </div>
+
+                <div class="form-group">
+                    <label>جراح:</label>
+                    <input type="text" id="surgeon" placeholder="مثال: دکتر محمدی">
+                </div>
+                <div class="form-group">
+                    <label>اتند بیهوشی:</label>
+                    <input type="text" id="anesthesia_attending" placeholder="مثال: دکتر علوی">
+                </div>
+                <div class="form-group">
+                    <label>پرسنل اتاق عمل:</label>
+                    <input type="text" id="or_staff">
+                </div>
+                <div class="form-group">
+                    <label>پرسنل هوشبری:</label>
+                    <input type="text" id="anesthesia_staff">
+                </div>
+                <div class="form-group">
+                    <label>پرسنل CSR:</label>
+                    <input type="text" id="csr_staff">
+                </div>
+                <div class="form-group">
+                    <label>پرسنل HIT:</label>
+                    <input type="text" id="hit_staff">
+                </div>
+                <div class="form-group">
+                    <label>پرسنل کمکی:</label>
+                    <input type="text" id="auxiliary_staff">
+                </div>
+                <div class="form-group">
+                    <label>پرسنل مهماندار:</label>
+                    <input type="text" id="host_staff">
+                </div>
+                <div class="form-group">
+                    <label>انباردار:</label>
+                    <input type="text" id="storekeeper">
+                </div>
+                <div class="form-group">
+                    <label>نیروی کد:</label>
+                    <input type="text" id="code_force">
+                </div>
+                <div class="form-group">
+                    <label>مسئول شیفت جنرال:</label>
+                    <input type="text" id="general_shift_supervisor" placeholder="مثال: خانم علوی">
+                </div>
+                <div class="form-group">
+                    <label>مسئول تابان:</label>
+                    <input type="text" id="taban_supervisor" placeholder="مثال: آقای احمدی">
+                </div>
+            </div>
+
+            <button type="button" class="btn-save" onclick="saveSurgery()">ذخیره و ارسال به مانیتور</button>
+            <button type="button" class="btn-clear" onclick="clearBoard()">🧹 پاکسازی برد (پایان شیفت)</button>
+        </form>
+    </div>
+
+    <script>
+        async function saveSurgery() {
+            const formData = new FormData();
+            formData.append('room_id', document.getElementById('room_id').value);
+            formData.append('shift_type', document.getElementById('shift_type').value);
+
+            // 🔥 اضافه شدن متغیرهای جدید برای ارسال به API سرور
+            formData.append('general_shift_supervisor', document.getElementById('general_shift_supervisor').value);
+            formData.append('taban_supervisor', document.getElementById('taban_supervisor').value);
+
+            formData.append('surgery_time', document.getElementById('surgery_time').value);
+            formData.append('surgery_date', document.getElementById('surgery_date').value);
+            formData.append('surgeon', document.getElementById('surgeon').value);
+            formData.append('anesthesia_attending', document.getElementById('anesthesia_attending').value);
+            formData.append('or_staff', document.getElementById('or_staff').value);
+            formData.append('anesthesia_staff', document.getElementById('anesthesia_staff').value);
+            formData.append('csr_staff', document.getElementById('csr_staff').value);
+            formData.append('hit_staff', document.getElementById('hit_staff').value);
+            formData.append('auxiliary_staff', document.getElementById('auxiliary_staff').value);
+            formData.append('host_staff', document.getElementById('host_staff').value);
+            formData.append('storekeeper', document.getElementById('storekeeper').value);
+            formData.append('code_force', document.getElementById('code_force').value);
+
+            try {
+                const response = await fetch('api.php?action=save_surgery', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    alert('عمل جراحی با موفقیت ثبت شد و در مانیتور راهرو قرار گرفت!');
+                    const currentShift = document.getElementById('shift_type').value;
+                    document.getElementById('surgeryForm').reset();
+                    document.getElementById('shift_type').value = currentShift;
+                } else {
+                    alert('خطا در ثبت: ' + result.message);
+                }
+            } catch (error) {
+                alert('ارتباط با سرور قطع شده است. دیتابیس را چک کنید.');
+                console.error(error);
+            }
+        }
+
+        async function clearBoard() {
+            if (confirm('آیا مطمئن هستید که می‌خواهید برد را برای شیفت جدید پاک کنید؟\n(اطلاعات پاک نمی‌شوند و برای گزارش‌گیری در دیتابیس باقی می‌مانند)')) {
+                try {
+                    const response = await fetch('api.php?action=clear_board', { method: 'POST' });
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        alert('برد با موفقیت پاکسازی شد و آماده ثبت برنامه‌های شیفت جدید است!');
+                    } else {
+                        alert('خطا در پاکسازی: ' + result.message);
+                    }
+                } catch (error) {
+                    alert('ارتباط با سرور قطع شده است.');
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

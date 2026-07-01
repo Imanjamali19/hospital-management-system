@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پورتال نمایشگرهای هوشمند - بیمارستان یثربی</title>
+    <link rel="icon" type="image/png" href="./media/LOG2O Qr.png">
+    <style>
+        /* تم بک‌گراند: مانیتور علائم حیاتی اتاق عمل */
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            font-family: Tahoma, 'Segoe UI', sans-serif;
+            background-color: #040914;
+            background-image:
+                linear-gradient(rgba(0, 255, 245, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 245, 0.05) 1px, transparent 1px),
+                radial-gradient(circle at 50% 0%, #0d1b2a 0%, #040914 80%);
+            background-size: 30px 30px, 30px 30px, 100% 100%;
+            background-attachment: fixed;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+        }
+
+        /* افکت خطوط تلویزیون‌های مانیتورینگ */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .hub-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hub-header img {
+            width: 70px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 15px rgba(0, 255, 245, 0.5));
+        }
+
+        .hub-header h1 {
+            font-size: 2.2rem;
+            color: #00fff5;
+            margin: 0;
+            text-shadow: 0 0 20px rgba(0, 255, 245, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .hub-header p {
+            color: #8d99ae;
+            font-size: 1.1rem;
+            margin: 5px 0 0 0;
+        }
+
+        .digital-clock {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #06d6a0;
+            text-shadow: 0 0 20px rgba(6, 214, 160, 0.6);
+            margin-bottom: 10px;
+            direction: ltr;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 3px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .ecg-background {
+            width: 100%;
+            max-width: 1200px;
+            height: 100px;
+            position: relative;
+            margin-bottom: 25px;
+            margin-top: -10px;
+            z-index: 5;
+            animation: pulse-heart 2.5s infinite;
+        }
+
+        .ecg-line {
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 100"><path d="M 0 50 L 100 50 L 110 40 L 120 50 L 135 50 L 145 60 L 165 10 L 185 90 L 195 50 L 215 50 L 230 35 L 250 50 L 600 50" fill="none" stroke="%2300fff5" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>') repeat-x;
+            background-size: 600px 100%;
+            filter: drop-shadow(0 0 6px rgba(0, 255, 245, 0.8));
+
+            -webkit-mask-image: linear-gradient(to right,
+                    transparent 0%, transparent 5%, rgba(0, 0, 0, 0.15) 30%,
+                    rgba(0, 0, 0, 0.8) 93%, rgba(0, 0, 0, 1) 98%,
+                    transparent 99%, transparent 100%);
+            mask-image: linear-gradient(to right,
+                    transparent 0%, transparent 5%, rgba(0, 0, 0, 0.15) 30%,
+                    rgba(0, 0, 0, 0.8) 93%, rgba(0, 0, 0, 1) 98%,
+                    transparent 99%, transparent 100%);
+            -webkit-mask-size: 600px 100%;
+            mask-size: 600px 100%;
+            animation: sweep-mask 2.5s linear infinite;
+        }
+
+        @keyframes sweep-mask {
+            from {
+                -webkit-mask-position: 0 0;
+                mask-position: 0 0;
+            }
+
+            to {
+                -webkit-mask-position: 600px 0;
+                mask-position: 600px 0;
+            }
+        }
+
+        @keyframes pulse-heart {
+            0% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+
+            26% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+
+            28% {
+                transform: scale(1.05);
+                filter: brightness(1.6);
+            }
+
+            32% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+
+            100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+        }
+
+        .monitors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .monitor-card.main-board {
+            grid-column: span 3;
+        }
+
+        @media (max-width: 1024px) {
+            .monitor-card.main-board {
+                grid-column: span 1;
+            }
+        }
+
+        /* ---------------------------------------------------- */
+        /* 🔥 افکت Aurora Glow دقیقاً مطابق تصویر اما توخالی (شیشه‌ای) */
+        /* ---------------------------------------------------- */
+
+        /* تعریف زاویه متحرک برای چرخش گرادیان */
+        @property --aurora {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @keyframes spin-aurora {
+            0% {
+                --aurora: 0deg;
+            }
+
+            100% {
+                --aurora: 360deg;
+            }
+        }
+
+        .monitor-card {
+            background: rgba(13, 27, 42, 0.4);
+            /* شیشه شفاف - وسط کارت هرگز سیاه نمی‌شود */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 18px;
+            padding: 30px 20px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+
+            position: relative;
+            z-index: 1;
+        }
+
+        /* لایه‌ی چرخشی نور فقط برای حاشیه */
+        .monitor-card::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            /* نور از لبه‌ی کارت کمی بیرون می‌زند */
+            border-radius: 20px;
+
+            /* رنگ‌های دقیقاً استخراج شده از کد عکس شما */
+            background: conic-gradient(from var(--aurora, 0deg),
+                    violet,
+                    pink,
+                    blue,
+                    cyan,
+                    violet);
+
+            /* ترفند جادویی: خالی کردن وسط نور با ماسک تا کارت شیشه‌ای بماند */
+            padding: 4px;
+            /* ضخامت خط نوری */
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+
+            /* اعمال افکت بلور عکس */
+            filter: blur(8px);
+
+            /* انیمیشن چرخشی دقیقاً طبق عکس */
+            animation: spin-aurora 4s linear infinite;
+
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.85;
+            transition: opacity 0.3s, filter 0.3s;
+        }
+
+        .monitor-card:hover::before {
+            opacity: 1;
+            filter: blur(12px);
+            /* درخشش بیشتر با رفتن موس */
+        }
+
+        .monitor-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.05);
+            /* شفاف‌تر شدن کارت */
+        }
+
+        /* نگه داشتن آیکون و متن در لایه‌ی رویی */
+        .monitor-card>* {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ---------------------------------------------------- */
+
+        .card-icon {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .card-desc {
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .admin-link {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            color: #a9b8c2;
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: 1px solid rgba(169, 184, 194, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: 0.3s;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .admin-link:hover {
+            color: #00fff5;
+            border-color: #00fff5;
+            background: rgba(0, 255, 245, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 245, 0.2);
+        }
+
+        .developer-credit {
+            margin-top: 50px;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .developer-credit span {
+            color: #00fff5;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 1px;
+            padding: 0 3px;
+        }
+
+        .developer-credit:hover {
+            color: #94a3b8;
+        }
+
+        .developer-credit:hover span {
+            text-shadow: 0 0 10px rgba(0, 255, 245, 0.8);
+        }
+
+        /* ---------------------------------------------------- */
+        /* ✨ افکت فان: ایموجی‌های برنامه‌نویسی روی هاور اسم توسعه‌دهنده */
+        /* ---------------------------------------------------- */
+        .developer-credit span {
+            position: relative;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .developer-credit span.dev-active {
+            text-shadow: 0 0 12px rgba(0, 255, 245, 0.9), 0 0 25px rgba(0, 255, 245, 0.5);
+            animation: dev-name-pulse 0.6s ease-in-out;
+        }
+
+        @keyframes dev-name-pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
+        }
+
+        .dev-emoji-particle {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.4rem;
+            z-index: 9999;
+            animation: dev-emoji-float 1.3s ease-out forwards;
+            user-select: none;
+        }
+
+        @keyframes dev-emoji-float {
+            0% {
+                transform: translate(0, 0) scale(0.4) rotate(0deg);
+                opacity: 0;
+            }
+
+            15% {
+                opacity: 1;
+                transform: translate(var(--tx-start), var(--ty-start)) scale(1.1) rotate(var(--rot));
+            }
+
+            100% {
+                transform: translate(var(--tx-end), var(--ty-end)) scale(0.6) rotate(var(--rot-end));
+                opacity: 0;
+            }
+        }
+
+        /* ---------------------------------------------------- */
+    </style>
+</head>
+
+<body>
+
+    <a href="login.html" class="admin-link">⚙️ ورود به داشبورد مدیریت</a>
+
+    <div class="hub-header">
+        <img src="./media/LOG2O Qr.png" alt="لوگو" onerror="this.style.display='none'">
+        <h1>پورتال نمایشگرهای هوشمند اتاق عمل</h1>
+        <p>بیمارستان فوق تخصصی یثربی</p>
+    </div>
+
+    <div class="digital-clock" id="clock">00:00:00</div>
+
+    <div class="ecg-background">
+        <div class="ecg-line"></div>
+    </div>
+
+    <div class="monitors-grid">
+        <a href="public.html" target="_blank" class="monitor-card main-board">
+            <div class="card-icon">🖥️</div>
+            <div class="card-title">برد دیجیتال الکترونیک اتاق‌های عمل</div>
+            <div class="card-desc">نمایش آنلاین وضعیت جراحی و پرسنل فعال در اتاق‌ها</div>
+        </a>
+
+        <a href="public_schedule.html" target="_blank" class="monitor-card schedule">
+            <div class="card-icon">📅</div>
+            <div class="card-title">Schedule</div>
+            <div class="card-desc">نمایش توضیحات، اسامی و آنکال‌های شیفت‌های صبح، عصر و شب</div>
+        </a>
+
+        <a href="public_report.html" target="_blank" class="monitor-card report">
+            <div class="card-icon">📋</div>
+            <div class="card-title">بایگانی عمومی گزارشات OR</div>
+            <div class="card-desc">مشاهده وقایع بالینی، مستندات و کمبودهای ثبت شده در اتاق عمل</div>
+        </a>
+
+        <a href="public_csr_report.html" target="_blank" class="monitor-card csr-report">
+            <div class="card-icon">⚙️</div>
+            <div class="card-title">مانیتور زنده گزارشات CSR</div>
+            <div class="card-desc">مشاهده آنلاین وقایع و عملکردهای ثبت شده در واحد استریلیزاسیون</div>
+        </a>
+
+        <a href="view_staff.html" target="_blank" class="monitor-card staff">
+            <div class="card-icon">👥</div>
+            <div class="card-title">برنامه ماهیانه پرسنل</div>
+            <div class="card-desc">مشاهده جدول توزیع پرسنل اتاق عمل</div>
+        </a>
+
+        <a href="view_surgeons.html" target="_blank" class="monitor-card surgeons">
+            <div class="card-icon">🩺</div>
+            <div class="card-title">برنامه آنکالی جراحان</div>
+            <div class="card-desc">جدول زمان‌بندی پزشکان مقیم و آنکال</div>
+        </a>
+
+        <a href="view_99.html" target="_blank" class="monitor-card c99">
+            <div class="card-icon">❤️‍🔥</div>
+            <div class="card-title">تیم شیفت کد ۹۹ (CPR)</div>
+            <div class="card-desc">اعضای مستقر تیم احیای قلبی ریوی</div>
+        </a>
+
+        <a href="view_98.html" target="_blank" class="monitor-card c98">
+            <div class="card-icon">🫁</div>
+            <div class="card-title">تیم شیفت کد ۹۸</div>
+            <div class="card-desc">تیم فوریت‌های تنفسی و اورژانس</div>
+        </a>
+
+        <a href="view_training.html" target="_blank" class="monitor-card edu">
+            <div class="card-icon">📚</div>
+            <div class="card-title">تابلوی آموزش و کنفرانس</div>
+            <div class="card-desc">برنامه‌های آموزشی و پروتکل‌ها</div>
+        </a>
+
+        <a href="view_management.html" target="_blank" class="monitor-card manage">
+            <div class="card-icon">📈</div>
+            <div class="card-title">برنامه راند مدیریتی</div>
+            <div class="card-desc">ساعت حضور بازرسین جهت راند بخش</div>
+        </a>
+
+        <a href="view_washing.html" target="_blank" class="monitor-card wash">
+            <div class="card-icon">🧼</div>
+            <div class="card-title">Washing</div>
+            <div class="card-desc">زمان‌بندی شستشوی اتاق‌های عمل</div>
+        </a>
+
+        <a href="view_csr.html" target="_blank" class="monitor-card csr-card">
+            <div class="card-icon">📦</div>
+            <div class="card-title">برنامه شیفت CSR</div>
+            <div class="card-desc">شیفت‌بندی پرسنل استریلیزاسیون</div>
+        </a>
+    </div>
+
+    <div class="developer-credit">
+        طراحی و توسعه توسط <span>imanjamali</span> (بخش IT بیمارستان)
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText =
+                String(now.getHours()).padStart(2, '0') + ":" +
+                String(now.getMinutes()).padStart(2, '0') + ":" +
+                String(now.getSeconds()).padStart(2, '0');
+        }
+        setInterval(updateClock, 1000); updateClock();
+    </script>
+
+    <script>
+        // ✨ افکت فان: پخش ایموجی‌های برنامه‌نویسی روی هاور اسم توسعه‌دهنده
+        (function () {
+            const devSpan = document.querySelector('.developer-credit span');
+            if (!devSpan) return;
+
+            const emojis = ['⌨️', '💻', '👨‍💻', '🎬', '🎭', '🖱️', '🧠', '🔥'];
+
+            devSpan.addEventListener('mouseenter', () => {
+                devSpan.classList.add('dev-active');
+                const rect = devSpan.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                const count = 8;
+                for (let i = 0; i < count; i++) {
+                    const particle = document.createElement('span');
+                    particle.className = 'dev-emoji-particle';
+                    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+                    const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.5 - 0.25);
+                    const distance = 70 + Math.random() * 50;
+                    const tx = Math.cos(angle) * distance;
+                    const ty = Math.sin(angle) * distance - 20;
+
+                    particle.style.left = centerX + 'px';
+                    particle.style.top = centerY + 'px';
+                    particle.style.setProperty('--tx-start', (tx * 0.2) + 'px');
+                    particle.style.setProperty('--ty-start', (ty * 0.2) + 'px');
+                    particle.style.setProperty('--tx-end', tx + 'px');
+                    particle.style.setProperty('--ty-end', ty + 'px');
+                    particle.style.setProperty('--rot', (Math.random() * 40 - 20) + 'deg');
+                    particle.style.setProperty('--rot-end', (Math.random() * 360) + 'deg');
+                    particle.style.animationDelay = (Math.random() * 0.15) + 's';
+
+                    document.body.appendChild(particle);
+                    particle.addEventListener('animationend', () => particle.remove());
+                }
+            });
+
+            devSpan.addEventListener('mouseleave', () => {
+                devSpan.classList.remove('dev-active');
+            });
+        })();
+    </script>
+</body>
+
+</html>

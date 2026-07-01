@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>برد متنی شیفت‌های روزانه</title>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #040914; margin: 0; padding: 20px; color: #fff; display: flex; gap: 20px; height: 100vh; box-sizing: border-box; overflow: hidden; }
+        
+        .calendar-side { width: 450px; background: rgba(13, 27, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; display: flex; flex-direction: column; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .cal-btn { background: rgba(255,255,255,0.1); border: none; padding: 8px 15px; border-radius: 8px; color: #00fff5; cursor: pointer; font-weight: bold; }
+        .month-year { font-size: 1.5rem; font-weight: bold; color: #fff; }
+        .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; color: #8d99ae; margin-bottom: 15px; font-weight: bold; }
+        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .day-cell { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; font-size: 1.2rem; transition: 0.2s; position: relative; }
+        .day-cell:hover { border-color: #00fff5; color: #00fff5; }
+        .day-cell.active { background: #00fff5; color: #000; font-weight: bold; }
+        .day-cell.has-data::after { content: ''; position: absolute; bottom: 5px; width: 6px; height: 6px; background: #e74c3c; border-radius: 50%; box-shadow: 0 0 8px #e74c3c; }
+        .day-cell.empty { visibility: hidden; }
+
+        .display-side { flex: 1; display: flex; flex-direction: column; gap: 20px; min-height: 0; }
+        .date-title { background: rgba(13, 27, 42, 0.8); padding: 20px; border-radius: 15px; text-align: center; font-size: 1.8rem; color: #00fff5; border: 1px solid rgba(0,255,245,0.3); flex-shrink: 0; }
+        
+        .shift-cards-container { display: flex; gap: 20px; flex: 1; min-height: 0; }
+        
+        /* جلوگیری از کش آمدن کادر به بیرون از صفحه */
+        .shift-card { flex: 1; background: rgba(13, 27, 42, 0.8); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+        
+        .shift-header { padding: 15px; text-align: center; font-size: 1.5rem; font-weight: bold; color: #fff; position: relative; display: flex; flex-direction: column; gap: 5px; align-items: center; flex-shrink: 0;}
+        .author-tag { font-size: 0.9rem; font-weight: normal; background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 10px; }
+        
+        .morning .shift-header { background: #d35400; }
+        .afternoon .shift-header { background: #8e44ad; }
+        .night .shift-header { background: #2c3e50; }
+        
+        /* ------------------------------------------------ */
+        /* اعمال تنظیمات شکستن خط و اسکرول عمودی به متن */
+        /* ------------------------------------------------ */
+        .shift-content { 
+            padding: 25px; 
+            font-size: 1.3rem; 
+            line-height: 2; 
+            color: #e9ecef; 
+            white-space: pre-wrap; /* حفظ اینترهای زده شده در داشبورد */
+            word-wrap: break-word; /* شکستن کلمات طولانی */
+            overflow-wrap: break-word; 
+            word-break: break-word; /* اجبار به شکستن خطوط به جای رفتن به چپ */
+            flex-grow: 1; 
+            overflow-y: auto; /* اسکرول فقط به سمت پایین */
+            overflow-x: hidden; /* بستن راه فرار متن به سمت چپ و راست */
+        }
+
+        /* استایل اسکرول‌بار ظریف و شیک برای داخل کادرها */
+        .shift-content::-webkit-scrollbar { width: 6px; }
+        .shift-content::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .shift-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        .shift-content::-webkit-scrollbar-thumb:hover { background: #00fff5; }
+
+        .empty-shift { color: #7f8c8d; font-style: italic; text-align: center; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <div class="calendar-side">
+        <div class="cal-header">
+            <button class="cal-btn" onclick="changeMonth(1)">بعدی</button>
+            <div class="month-year" id="monthYearDisplay">در حال بارگذاری...</div>
+            <button class="cal-btn" onclick="changeMonth(-1)">قبلی</button>
+        </div>
+        <div class="weekdays"><div>ش</div><div>ی</div><div>د</div><div>س</div><div>چ</div><div>پ</div><div>ج</div></div>
+        <div class="days-grid" id="daysGrid"></div>
+    </div>
+
+    <div class="display-side">
+        <div class="date-title" id="selectedDateDisplay">برنامه روز: در حال دریافت...</div>
+        
+        <div class="shift-cards-container">
+            <div class="shift-card morning">
+                <div class="shift-header">☀️ شیفت صبح <div class="author-tag" id="disp_reg_m"></div></div>
+                <div class="shift-content" id="display_morning"></div>
+            </div>
+            <div class="shift-card afternoon">
+                <div class="shift-header">🌤️ شیفت عصر <div class="author-tag" id="disp_reg_a"></div></div>
+                <div class="shift-content" id="display_afternoon"></div>
+            </div>
+            <div class="shift-card night">
+                <div class="shift-header">🌙 شیفت شب <div class="author-tag" id="disp_reg_n"></div></div>
+                <div class="shift-content" id="display_night"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPDate = new persianDate();
+        let selectedDate = currentPDate.format('YYYY/MM/DD');
+        let activeDates = [];
+
+        async function fetchActiveDates() {
+            try {
+                const res = await fetch('api.php?action=get_schedule_data');
+                const json = await res.json();
+                if(json.status === 'success') activeDates = json.active_dates || [];
+                renderCalendar();
+            } catch(e) {}
+        }
+
+        function renderCalendar() {
+            const daysGrid = document.getElementById('daysGrid'); daysGrid.innerHTML = '';
+            const year = currentPDate.year(); const month = currentPDate.month();
+            document.getElementById('monthYearDisplay').innerText = `${currentPDate.format('MMMM')} ${year}`;
+            
+            const firstDayOfMonth = new persianDate([year, month, 1]);
+            let startDayOfWeek = firstDayOfMonth.day();
+            const daysInMonth = currentPDate.daysInMonth();
+
+            for(let i = 1; i < startDayOfWeek; i++) { daysGrid.innerHTML += `<div class="day-cell empty"></div>`; }
+
+            for(let d = 1; d <= daysInMonth; d++) {
+                const mStr = month < 10 ? '0'+month : month; const dStr = d < 10 ? '0'+d : d;
+                const fullDateStr = `${year}/${mStr}/${dStr}`;
+                const isActive = fullDateStr === selectedDate ? 'active' : '';
+                const hasData = activeDates.includes(fullDateStr) ? 'has-data' : '';
+                daysGrid.innerHTML += `<div class="day-cell ${isActive} ${hasData}" onclick="selectDate('${fullDateStr}')">${d}</div>`;
+            }
+        }
+
+        function changeMonth(offset) { currentPDate = currentPDate.add('months', offset); renderCalendar(); }
+
+        async function selectDate(dateStr) {
+            selectedDate = dateStr;
+            document.getElementById('selectedDateDisplay').innerText = `برنامه روز: ${dateStr}`;
+            renderCalendar();
+            
+            try {
+                const res = await fetch(`api.php?action=get_schedule_data&date=${dateStr}`);
+                const json = await res.json();
+                
+                const fillBox = (id_txt, id_reg, text_data, reg_data) => {
+                    document.getElementById(id_txt).innerHTML = text_data ? text_data : '<div class="empty-shift">بدون برنامه</div>';
+                    document.getElementById(id_reg).innerText = reg_data ? `✍️ ${reg_data}` : 'بدون نویسنده';
+                };
+
+                if (json.status === 'success' && json.data) {
+                    fillBox('display_morning', 'disp_reg_m', json.data.morning_shift, json.data.morning_reg);
+                    fillBox('display_afternoon', 'disp_reg_a', json.data.afternoon_shift, json.data.afternoon_reg);
+                    fillBox('display_night', 'disp_reg_n', json.data.night_shift, json.data.night_reg);
+                } else {
+                    fillBox('display_morning', 'disp_reg_m', null, null);
+                    fillBox('display_afternoon', 'disp_reg_a', null, null);
+                    fillBox('display_night', 'disp_reg_n', null, null);
+                }
+            } catch (e) {}
+        }
+
+        fetchActiveDates(); selectDate(selectedDate);
+        setInterval(() => { fetchActiveDates(); selectDate(selectedDate); }, 30000); 
+    </script>
+</body>
+</html>

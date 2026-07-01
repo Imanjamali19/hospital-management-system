@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>نمایش برنامه ماهیانه پرسنل</title>
+    <link rel="icon" type="image/png" href="./media/LOG2O Qr.png">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        :root { --accent: #3498db; }
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100vw; height: 100vh; 
+            background: #040914; font-family: Tahoma, sans-serif; 
+            overflow: hidden; display: flex; flex-direction: column; 
+        }
+        
+        .header { 
+            font-size: 1.6rem; font-weight: bold; padding: 10px 0; margin: 0;
+            color: var(--accent); text-align: center; background: rgba(0,0,0,0.9);
+            border-bottom: 3px solid var(--accent); flex-shrink: 0; z-index: 10;
+        }
+        
+        #display-area { 
+            flex-grow: 1; width: 100%; position: relative; 
+            background: #ffffff; display: block;
+            overflow-y: auto; /* فقط اسکرول عمودی فعال است */
+            overflow-x: hidden; /* اسکرول افقی قفل شد */
+            padding: 0; /* 🔥 حذف کامل حاشیه‌های کادر برای استفاده ۱۰۰ درصدی از مانیتور */
+        }
+        
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 6px; }
+        
+        #table-wrapper { 
+            transform-origin: top right; 
+            width: max-content; 
+        }
+        
+        table { 
+            border-collapse: collapse; background: #ffffff !important; 
+            width: max-content; margin-bottom: 30px;
+        }
+        
+        /* 🔥 استایل جادویی برای درشت شدن فونت‌ها و حذف فضاهای مرده */
+        td, th { 
+            padding: 4px 2px !important; /* کمترین فاصله ممکن بین متن و خطوط */
+            border: 1px solid #94a3b8 !important; /* خطوط کمی پررنگ‌تر برای تفکیک بهتر */
+            text-align: center !important; 
+            font-size: 1.5rem !important; /* فونت بسیار درشت */
+            font-weight: bold !important; 
+            color: #0f172a !important; 
+            white-space: nowrap; 
+            letter-spacing: -0.5px; /* نزدیک کردن حروف برای جاگیری بهتر در ستون‌های باریک */
+        }
+        
+        th, tr:first-child td { background: var(--accent) !important; color: white !important; font-size: 1.6rem !important; }
+        tr:nth-child(even) { background: #f1f5f9 !important; /* کنتراست بیشتر بین ردیف‌ها */ }
+        
+        .loading { font-size: 1.5rem; color: #333; font-weight: bold; text-align: center; margin-top: 50px; }
+        img.doc-image { max-width: 100%; height: auto; display: block; }
+    </style>
+</head>
+<body>
+    <div class="header">👥 برنامه ماهیانه پرسنل اتاق عمل</div>
+    <div id="display-area"><div class="loading">⏳ در حال بارگذاری...</div></div>
+
+    <script>
+        function fitWidthOnly() {
+            const area = document.getElementById('display-area');
+            const wrapper = document.getElementById('table-wrapper');
+            if (!wrapper || !area) return;
+
+            wrapper.style.transform = 'scale(1)';
+            wrapper.style.marginBottom = '0px';
+
+            const areaWidth = area.clientWidth; // استفاده از تمام عرض بدون کسر حاشیه
+            const tableWidth = wrapper.scrollWidth;
+            const tableHeight = wrapper.scrollHeight;
+
+            if (tableWidth === 0) return;
+
+            const scale = areaWidth / tableWidth;
+
+            if (scale < 1) {
+                wrapper.style.transform = `scale(${scale})`;
+                const lostHeight = tableHeight - (tableHeight * scale);
+                wrapper.style.marginBottom = `-${lostHeight}px`;
+            }
+        }
+
+        window.addEventListener('resize', fitWidthOnly);
+
+        async function loadDoc() {
+            const display = document.getElementById('display-area');
+            try {
+                const type = 'staff'; 
+
+                const res = await fetch(`api.php?action=get_file_info&type=${type}`);
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    if (['jpg', 'jpeg', 'png'].includes(data.ext)) {
+                        display.innerHTML = `<img class="doc-image" src="${data.url}&t=${new Date().getTime()}">`;
+                    } else if (['xlsx', 'xls', 'csv'].includes(data.ext)) {
+                        const response = await fetch(data.url);
+                        if (!response.ok) throw new Error("مسدود شده توسط شبکه");
+                        const workbook = XLSX.read(await response.arrayBuffer(), {type: 'array'});
+                        
+                        display.innerHTML = `<div id="table-wrapper">${XLSX.utils.sheet_to_html(workbook.Sheets[workbook.SheetNames[0]])}</div>`;
+                        
+                        setTimeout(fitWidthOnly, 50);
+                    }
+                } else { display.innerHTML = '<div style="color:#64748b; font-size:1.5rem; text-align:center; padding: 50px;">فایلی آپلود نشده است.</div>'; }
+            } catch(e) { display.innerHTML = `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding: 50px;">خطا در شبکه:<br>${e.message}</div>`; }
+        }
+        
+        loadDoc(); 
+        setInterval(loadDoc, 60000);
+    </script>
+</body>
+</html>

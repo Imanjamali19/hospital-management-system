@@ -1,0 +1,301 @@
+/* تنظیمات پایه */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f7f7f7;
+    /* پس‌زمینه ملایم کل صفحه */
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.admin-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+/* --- هدر صفحه --- */
+.admin-page-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.admin-page-header h1 {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 0;
+}
+
+/* --- تب‌های اتاق عمل --- */
+.or-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.tab-btn {
+    border-radius: 50px;
+    padding: 10px 25px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #7f8c8d;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.tab-btn:hover {
+    background-color: #f1f1f1;
+}
+
+.tab-btn.active {
+    background-color: #e0f7fa;
+    /* آبی کم‌رنگ */
+    color: #01579b;
+    /* آبی پررنگ‌تر */
+    font-weight: bold;
+    border-color: transparent;
+}
+
+/* --- کارت اصلی مدیریت --- */
+.or-card {
+    background-color: #fdfdfd;
+    /* سفید کم‌رنگ مطابق تصویر */
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.room-title {
+    text-align: right;
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 1.4rem;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+/* --- بلوک پزشک --- */
+.doctor-block {
+    position: relative;
+    /* برای دکمه حذف مطلق */
+    border-bottom: 1px solid #eee;
+    padding-bottom: 25px;
+    margin-bottom: 25px;
+}
+
+.delete-doctor-btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #ffe0e0;
+    color: #d32f2f;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 15px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: block;
+    /* در ابتدا پنهان نیست، اما در تصویر فقط برای پزشک ۱ است. برای پزشکان اضافی باید نمایش داده شود. */
+}
+
+.block-header {
+    text-align: right;
+    margin-bottom: 15px;
+}
+
+.block-header h3 {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    margin: 0;
+}
+
+/* --- فیلدهای فرم --- */
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: right;
+}
+
+.flex-2 {
+    flex: 2;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    font-weight: normal;
+}
+
+.form-group input {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    color: #333;
+}
+
+/* --- فیلد تگ‌ها --- */
+.tag-input-group {
+    margin-bottom: 20px;
+}
+
+.tag-input-wrapper {
+    background-color: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: row-reverse;
+    /* تگ‌ها از راست به چپ */
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 50px;
+}
+
+.tags-container {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    border-radius: 50px;
+    padding: 6px 15px;
+    font-size: 0.95rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 5px;
+}
+
+/* تگ‌های استاتیک در تصویر */
+.tag:nth-child(1) {
+    background-color: #e3f2fd;
+}
+
+/* لیلا جعفری */
+.tag:nth-child(2) {
+    background-color: #e3f2fd;
+}
+
+/* پریسا ملکی */
+.tag.active-tag {
+    background-color: #d1c4e9;
+}
+
+/* تگ فعال (حامد نوری و سمیه قاسمی) */
+
+.tag i {
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.tag-input-wrapper input {
+    background: transparent;
+    border: none;
+    outline: none;
+    flex: 1;
+    min-width: 200px;
+    font-size: 0.95rem;
+    color: #7f8c8d;
+}
+
+/* --- دکمه‌ها --- */
+.add-doctor-btn {
+    border: 1px dashed #757575;
+    background: transparent;
+    color: #333;
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    text-align: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.add-doctor-btn:hover {
+    background-color: #f1f1f1;
+}
+
+.admin-block {
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 30px;
+}
+
+.admin-block label {
+    font-size: 1rem;
+    color: #333;
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+.admin-block input {
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    font-weight: normal;
+    color: #333;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 40px;
+}
+
+.save-btn {
+    background-color: #0277bd;
+    /* آبی پررنگ مطابق تصویر */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 35px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.save-btn:hover {
+    background-color: #01579b;
+}
+
+.cancel-btn {
+    background-color: white;
+    color: #757575;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: normal;
+}
